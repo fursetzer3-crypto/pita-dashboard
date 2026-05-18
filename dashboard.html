@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Agent Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">⚙️</span>
+                    <h1>OpenClaw Agent Dashboard</h1>
+                </div>
+                <div class="header-controls">
+                    <button id="searchToggle" class="header-btn" title="Search (Ctrl+F)">🔍</button>
+                    <button id="settingsToggle" class="header-btn" title="Settings">⚙️</button>
+                    <button id="refreshBtn" class="header-btn" title="Refresh Status">🔄</button>
+                </div>
+            </div>
+        </header>
+        <div class="dashboard-status-bar">
+            <div id="dashboardStatusText" class="status-text">Initializing dashboard...</div>
+            <div id="refreshCountdown" class="refresh-countdown">Auto-refresh disabled</div>
+        </div>
+
+        <div class="dashboard-content">
+            <!-- Main Agent Panel (PITA) -->
+            <section class="pita-panel panel">
+                <div class="panel-header">
+                    <div class="agent-title">
+                        <span class="agent-icon">🤖</span>
+                        <h2>PITA (Main Agent)</h2>
+                        <span class="status-badge status-active">ACTIVE</span>
+                    </div>
+                    <button class="minimize-btn" data-agent="pita-main">−</button>
+                </div>
+                
+                <div class="panel-body">
+                    <div class="messages-container" id="pitaMessages">
+                        <div class="message system">
+                            <span>PITA agent initialized. Ready for commands.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message-input-area">
+                        <textarea id="pitaInput" class="message-input" placeholder="Send message to PITA..." rows="2"></textarea>
+                        <button class="send-btn" id="pitaSendBtn">Send</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Broadcast / Collective Commands -->
+            <section class="broadcast-panel panel">
+                <div class="panel-header">
+                    <h2>Collective Command</h2>
+                    <span class="status-badge status-ready">BROADCAST</span>
+                </div>
+                <div class="panel-body">
+                    <textarea id="broadcastInput" class="message-input" placeholder="Send a command to all agents..." rows="2"></textarea>
+                    <button class="send-btn" id="broadcastSendBtn">Broadcast</button>
+                </div>
+            </section>
+
+            <!-- Provider Strategy Panel -->
+            <section class="strategy-panel panel">
+                <div class="panel-header">
+                    <h2>AI Provider Strategy</h2>
+                    <span class="status-badge status-ready">CHEAP FIRST</span>
+                </div>
+                <div class="panel-body provider-strategy-list" id="providerStrategyList">
+                    <!-- Provider strategy loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Agents List Panel -->
+            <section class="agents-panel panel">
+                <div class="panel-header">
+                    <h2>Spawned Agents</h2>
+                    <div class="panel-controls">
+                        <span id="agentCount" class="agent-count">0 agents</span>
+                        <button class="filter-toggle" id="filterBtn" title="Filter by status">▼</button>
+                    </div>
+                </div>
+
+                <!-- Filter Controls (Hidden by default) -->
+                <div class="filter-controls" id="filterControls" style="display: none;">
+                    <label><input type="checkbox" value="ACTIVE" class="status-filter"> ACTIVE</label>
+                    <label><input type="checkbox" value="RUNNING" class="status-filter"> RUNNING</label>
+                    <label><input type="checkbox" value="COMPLETE" class="status-filter"> COMPLETE</label>
+                    <label><input type="checkbox" value="READY" class="status-filter"> READY</label>
+                    <label><input type="checkbox" value="QUEUED" class="status-filter"> QUEUED</label>
+                    <label><input type="checkbox" value="ERROR" class="status-filter"> ERROR</label>
+                    <label><input type="checkbox" value="IDLE" class="status-filter"> IDLE</label>
+                </div>
+
+                <div class="agents-list" id="agentsList">
+                    <!-- Dynamically populated -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Agent Chat Modal -->
+    <div class="modal" id="agentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span id="modalAgentIcon" class="agent-icon">🤖</span>
+                    <div>
+                        <h2 id="modalAgentName">Agent Name</h2>
+                        <p id="modalAgentDesc">Agent description</p>
+                    </div>
+                </div>
+                <div class="modal-controls">
+                    <span id="modalStatus" class="status-badge status-queued">QUEUED</span>
+                    <button class="modal-btn" id="exportBtn" title="Export conversation">💾</button>
+                    <button class="modal-btn" id="clearBtn" title="Clear history">🗑️</button>
+                    <button class="modal-btn close-btn" id="closeModalBtn">✕</button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="agent-messages" id="agentMessages">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <textarea id="agentInput" class="agent-input" placeholder="Send message to this agent..." rows="2"></textarea>
+                <button class="send-btn" id="agentSendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal" id="searchModal">
+        <div class="modal-content search-modal">
+            <div class="modal-header">
+                <h2>Search Conversations</h2>
+                <button class="modal-btn close-btn" id="closeSearchBtn">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search across all agents...">
+                <div id="searchResults" class="search-results">
+                    <!-- Results populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-btn close-btn" id="closeSettingsBtn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label>
+                        <input type="checkbox" id="autoRefresh" checked>
+                        Auto-refresh agent status (3s interval)
+                    </label>
+                </div>
+                <div class="settings-group">
+                    <label>
+                        <input type="checkbox" id="soundNotifs" checked>
+                        Sound notifications for agent completion
+                    </label>
+                </div>
+                <div class="settings-group">
+                    <label>
+                        Max messages per agent:
+                        <input type="number" id="maxMessages" value="50" min="10" max="500" step="10">
+                    </label>
+                </div>
+                <div class="settings-group">
+                    <button id="exportAllBtn" class="export-btn">📥 Export All Conversations</button>
+                    <button id="clearAllBtn" class="clear-btn">🗑️ Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
+
+

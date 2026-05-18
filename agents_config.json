@@ -1,0 +1,138 @@
+{
+  "agents": [
+    {
+      "id": "pita-main",
+      "name": "PITA (Main Agent)",
+      "type": "main",
+      "status": "ACTIVE",
+      "description": "Primary intelligent task agent",
+      "icon": "BOT"
+    },
+    {
+      "id": "scanlite",
+      "name": "ScanLite",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Existing lightweight scanner and connectivity check agent",
+      "icon": "SCAN",
+      "shortcut": 2
+    },
+    {
+      "id": "memorykeeper",
+      "name": "Memory Keeper",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Preserves memory, docs, and chat context so history does not need to be reread repeatedly.",
+      "icon": "MEM",
+      "shortcut": 3
+    },
+    {
+      "id": "knowledgescout",
+      "name": "Knowledge Scout",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Searches the vault and prior records for evidence and context.",
+      "icon": "WEB",
+      "shortcut": 4
+    },
+    {
+      "id": "correctnessauditor",
+      "name": "Correctness Auditor",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Checks other agents' outputs for quality and correctness before delivery.",
+      "icon": "OK",
+      "shortcut": 5
+    },
+    {
+      "id": "orchestrationplanner",
+      "name": "Orchestration Planner",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Figures out what each agent needs to complete its task and creates or assigns resources accordingly.",
+      "icon": "PLAN",
+      "shortcut": 6
+    },
+    {
+      "id": "aisubscriptionmanager",
+      "name": "AI Subscription Manager",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Attaches subscriptions and keeps cheaper models prioritized to avoid throttle waits.",
+      "icon": "PAY",
+      "shortcut": 7
+    },
+    {
+      "id": "chatreader",
+      "name": "Chat Reader",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Reads and analyzes chat history.",
+      "icon": "CHAT",
+      "shortcut": 8
+    },
+    {
+      "id": "openclawconnectivity",
+      "name": "OpenClaw Connectivity",
+      "type": "spawned",
+      "status": "READY",
+      "description": "Diagnoses node connection and pairing issues.",
+      "icon": "LINK",
+      "shortcut": 9
+    },
+    {
+      "id": "duplicatecleanup",
+      "name": "Duplicate Cleanup",
+      "type": "spawned",
+      "status": "QUEUED",
+      "description": "Identifies and removes duplicate files.",
+      "icon": "CLEAN",
+      "shortcut": null
+    },
+    {
+      "id": "subscriptionaudit",
+      "name": "Subscription Audit",
+      "type": "spawned",
+      "status": "QUEUED",
+      "description": "Audits active subscriptions and recurring charges.",
+      "icon": "BILL",
+      "shortcut": null
+    }
+  ],
+  "providerStrategy": [
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "type": "free-first",
+      "description": "Prefer Gemini mini first for lower-cost or free access before paid options.",
+      "preferredModels": ["gemini-mini"]
+    },
+    {
+      "id": "openai",
+      "name": "ChatGPT / OpenAI",
+      "type": "cheap-paid",
+      "description": "Use OpenAI 3.5 first, avoiding higher-cost 4.x models unless no cheaper option is available.",
+      "preferredModels": ["gpt-3.5-turbo"]
+    },
+    {
+      "id": "claude",
+      "name": "Claude (Anthropic)",
+      "type": "paid",
+      "description": "Use Claude haiku 3.5 if cheaper providers are unavailable.",
+      "preferredModels": ["claude-haiku-3-5"]
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic API",
+      "type": "paid",
+      "description": "Fallback to Anthropic haiku 3.5 only after the above providers are exhausted.",
+      "preferredModels": ["claude-3.5-haiku-latest"]
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "pollInterval": 3000,
+    "maxHistoryMessages": 50,
+    "autoSaveInterval": 2000
+  }
+}
