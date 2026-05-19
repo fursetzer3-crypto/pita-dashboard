@@ -3,419 +3,318 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PITA Portfolio Dashboard</title>
+<title>PITA OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: #0b0d17;
-    color: #e2e8f0;
-    min-height: 100vh;
-    overflow-x: hidden;
-    font-size: 16px; line-height: 1.6;
-  }
-  .bg-glow {
-    position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(236,72,153,0.03) 0%, transparent 50%);
-    pointer-events: none; z-index: 0;
-  }
-  /* TOP BAR */
-  .topbar {
-    background: rgba(15,17,35,0.95); backdrop-filter: blur(12px);
-    display: flex; align-items: center; padding: 0 16px; height: 48px; gap: 10px;
-    border-bottom: 1px solid rgba(99,102,241,0.12); position: sticky; top: 0; z-index: 100;
-  }
-  .topbar::after {
-    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.3) 50%, transparent 100%);
-  }
-  .logo {
-    font-weight: 800; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;
-    background: linear-gradient(135deg, #f472b6, #a78bfa); -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .logo-emoji { font-size: 20px; -webkit-text-fill-color: initial; }
-  .status-badge {
-    display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8;
-    background: rgba(99,102,241,0.08); padding: 3px 8px; border-radius: 20px;
-    border: 1px solid rgba(99,102,241,0.15);
-  }
-  .status-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.5); }
-  .top-right { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #94a3b8; }
-  .top-right .clock { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #64748b; }
-  .avatar {
-    width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #f472b6, #a78bfa);
-    display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; font-weight: 700;
-    box-shadow: 0 0 12px rgba(167,139,250,0.3);
-  }
-  /* LAYOUT */
-  .app-layout { display: flex; height: calc(100vh - 48px); position: relative; z-index: 1; }
-  
-  /* SIDEBAR */
-  .sidebar {
-    width: 220px; min-width: 220px; background: rgba(10,14,30,0.95); border-right: 1px solid rgba(99,102,241,0.1);
-    display: flex; flex-direction: column; overflow-y: auto; user-select: none;
-  }
-  .sidebar-nav { padding: 8px 0; flex: 1; }
-  .folder {
-    display: flex; align-items: center; padding: 7px 14px; cursor: pointer; color: #94a3b8;
-    font-size: 12px; gap: 8px; border-left: 3px solid transparent; transition: all 0.12s;
-  }
-  .folder:hover { background: rgba(99,102,241,0.05); color: #cbd5e1; }
-  .folder.active { background: rgba(99,102,241,0.08); color: #e2e8f0; border-left-color: #a78bfa; font-weight: 600; }
-  .folder-icon { font-size: 14px; width: 18px; text-align: center; }
-  .folder-badge { margin-left: auto; font-size: 10px; background: rgba(99,102,241,0.12); padding: 1px 6px; border-radius: 10px; color: #94a3b8; }
-  .folder-divider { border: none; border-top: 1px solid rgba(99,102,241,0.06); margin: 4px 12px; }
-  .group-header {
-    padding: 6px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
-    color: #475569; cursor: pointer; display: flex; align-items: center; gap: 6px;
-  }
-  .group-header:hover { color: #94a3b8; }
-  .group-header .count { margin-left: auto; }
-  .agent-group { padding-left: 6px; }
-  .agent-group .folder { font-size: 11px; padding: 5px 14px 5px 28px; }
-  .agent-group .folder .folder-icon { font-size: 12px; width: 16px; }
-  .sidebar-footer { padding: 8px 14px; border-top: 1px solid rgba(99,102,241,0.06); font-size: 10px; color: #475569; display: flex; align-items: center; gap: 6px; }
-  .sidebar-footer .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
-  
-  /* MAIN AREA */
-  .main-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
-  
-  .dashboard-grid {
-    display: grid; grid-template-columns: 1fr 320px; gap: 12px; padding: 12px 16px; flex: 1;
-  }
-  .main-column { display: flex; flex-direction: column; gap: 10px; }
-
-  /* CARDS */
-  .card {
-    background: rgba(15,17,35,0.85); border: 1px solid rgba(99,102,241,0.08);
-    border-radius: 8px; overflow: hidden; transition: border-color 0.15s;
-  }
-  .card:hover { border-color: rgba(99,102,241,0.18); }
-  .card-hdr {
-    padding: 8px 14px; background: rgba(15,23,42,0.6); border-bottom: 1px solid rgba(99,102,241,0.06);
-    display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #cbd5e1;
-  }
-  .card-hdr .sub { font-weight: 400; font-size: 10px; color: #64748b; margin-left: auto; }
-  .card-body { padding: 2px 0; }
-
-  /* SUMMARY BAR */
-  .summary-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .summary-box {
-    background: rgba(15,17,35,0.85); border: 1px solid rgba(99,102,241,0.08); border-radius: 8px;
-    padding: 10px 12px; text-align: center;
-  }
-  .summary-box .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin-bottom: 2px; }
-  .summary-box .value { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-
-  /* PORTFOLIO ROWS */
-  .pp-row {
-    display: flex; align-items: center; padding: 5px 14px; font-size: 12px;
-    border-bottom: 1px solid rgba(99,102,241,0.02); gap: 4px;
-  }
-  .pp-row:hover { background: rgba(99,102,241,0.03); }
-  .pp-ticker { font-weight: 600; color: #e2e8f0; font-size: 13px; min-width: 42px; }
-  .pp-shares { color: #64748b; font-size: 11px; min-width: 32px; text-align: right; font-family: 'JetBrains Mono', monospace; }
-  .pp-price { font-family: 'JetBrains Mono', monospace; font-size: 12px; min-width: 56px; text-align: right; margin-left: auto; }
-  .pp-chg { font-family: 'JetBrains Mono', monospace; font-size: 11px; min-width: 44px; text-align: right; }
-  .pp-value { font-family: 'JetBrains Mono', monospace; font-size: 11px; min-width: 52px; text-align: right; color: #94a3b8; }
-  .pp-acct-name {
-    font-size: 11px; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.5px;
-    padding: 8px 14px 3px;
-  }
-  .pp-acct-footer {
-    font-size: 11px; color: #64748b; padding: 5px 14px; text-align: right;
-    border-top: 1px solid rgba(99,102,241,0.06);
-  }
-  .pp-acct-footer strong { color: #cbd5e1; }
-  .price-up { color: #4ade80 !important; }
-  .price-down { color: #fca5a5 !important; }
-  .price-flat { color: #94a3b8 !important; }
-
-  /* WOLF KILLER */
-  .wk-verdict {
-    display: inline-block; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px;
-    letter-spacing: 0.3px; vertical-align: middle; white-space: nowrap;
-  }
-  .wk-survivable { background: rgba(34,197,94,0.15); color: #4ade80; }
-  .wk-valid-spec { background: rgba(99,102,241,0.15); color: #a78bfa; }
-  .wk-trade { background: rgba(251,191,36,0.15); color: #facc15; }
-  .wk-wolfspeed { background: rgba(239,68,68,0.15); color: #fca5a5; }
-  .wk-sold { background: rgba(100,116,139,0.2); color: #94a3b8; text-decoration: line-through; }
-  .wk-unknown { background: rgba(100,116,139,0.1); color: #64748b; }
-
-  /* CHAT */
-  .chat-log { height: 260px; overflow-y: auto; padding: 10px 12px; background: rgba(2,6,23,0.28); }
-  .chat-msg {
-    max-width: 86%; margin: 0 0 8px; padding: 7px 10px; border-radius: 6px;
-    font-size: 12px; line-height: 1.4; white-space: pre-wrap;
-  }
-  .chat-msg.user { margin-left: auto; background: rgba(99,102,241,0.22); color: #f8fafc; border: 1px solid rgba(99,102,241,0.22); }
-  .chat-msg.assistant { background: rgba(15,23,42,0.78); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.10); }
-  .chat-msg.system { background: rgba(251,191,36,0.06); color: #94a3b8; text-align: center; max-width: 100%; font-size: 11px; }
-  .chat-toolbar {
-    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
-    border-bottom: 1px solid rgba(99,102,241,0.06);
-  }
-  .chat-toolbar select {
-    background: rgba(15,23,42,0.85); border: 1px solid rgba(99,102,241,0.18); color: #cbd5e1;
-    border-radius: 6px; padding: 5px 6px; font-size: 11px; min-width: 150px;
-  }
-  .chat-input-wrap { padding: 8px 12px 10px; border-top: 1px solid rgba(99,102,241,0.06); }
-  .chat-input-wrap textarea {
-    width: 100%; min-height: 60px; resize: vertical; background: rgba(2,6,23,0.62);
-    border: 1px solid rgba(99,102,241,0.18); border-radius: 6px; color: #e2e8f0;
-    padding: 8px 10px; font: 12px/1.4 'Inter', sans-serif; outline: none;
-  }
-  .chat-input-wrap textarea:focus { border-color: rgba(167,139,250,0.55); }
-  .chat-input-actions { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-  .chat-btn {
-    border: 1px solid rgba(99,102,241,0.18); border-radius: 6px; background: rgba(15,23,42,0.82);
-    color: #cbd5e1; padding: 6px 8px; font-size: 11px; font-weight: 700; cursor: pointer;
-  }
-  .chat-btn.primary { background: linear-gradient(135deg, #6366f1, #ec4899); color: #fff; border-color: rgba(255,255,255,0.12); margin-left: auto; }
-  .chat-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-  /* RIGHT SIDEBAR */
-  .right-sidebar { display: flex; flex-direction: column; gap: 10px; }
-  .control-note {
-    font-size: 11px; color: #94a3b8; padding: 10px 12px;
-    background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.12); border-radius: 6px;
-    line-height: 1.4;
-  }
-  .control-note strong { color: #e2e8f0; }
-  .connection-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
-  .connection-dot { width: 7px; height: 7px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
-  .connection-dot.ok { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.5); }
-  .chat-link {
-    display: block; text-align: center; text-decoration: none; color: #f8fafc;
-    background: linear-gradient(135deg, #6366f1, #ec4899); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 6px; padding: 7px 8px; font-size: 11px; font-weight: 700; line-height: 1.2; margin-top: 6px;
-  }
-  .chat-link.secondary { color: #cbd5e1; background: rgba(15,23,42,0.82); border-color: rgba(99,102,241,0.18); }
-  .readonly-note {
-    font-size: 10px; color: #64748b; padding: 6px 12px; background: rgba(251,191,36,0.06);
-    border: 1px solid rgba(251,191,36,0.1); border-radius: 6px; text-align: center; line-height: 1.4;
-  }
-  .refresh-line {
-    display: flex; align-items: center; gap: 4px; font-size: 10px; color: #475569; padding: 4px 12px;
-  }
-  .refresh-line .spinner {
-    width: 9px; height: 9px; border: 2px solid rgba(99,102,241,0.15);
-    border-top: 2px solid #a78bfa; border-radius: 50%; animation: spin 1.2s linear infinite; display: none;
-  }
-  .refresh-line .spinner.active { display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .vw-row {
-    display: flex; align-items: center; padding: 3px 12px; font-size: 11px; gap: 3px;
-    border-bottom: 1px solid rgba(99,102,241,0.02);
-  }
-  .vw-ticker { font-weight: 600; color: #cbd5e1; min-width: 38px; font-size: 12px; }
-  .vw-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-left: auto; }
-  .vw-chg { font-family: 'JetBrains Mono', monospace; font-size: 10px; min-width: 40px; text-align: right; }
-  .market-box {
-    display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 6px 12px; color: #94a3b8;
-  }
-  /* JOURNAL */
-  .journal-entries { max-height: 200px; overflow-y: auto; }
-  .j-entry {
-    display: flex; gap: 4px; align-items: center; padding: 3px 12px; font-size: 11px;
-    border-bottom: 1px solid rgba(99,102,241,0.02);
-  }
-  .j-entry .t { color: #475569; font-family: 'JetBrains Mono', monospace; font-size: 9px; width: 28px; flex-shrink: 0; }
-  .j-entry .tag {
-    font-size: 7px; font-weight: 700; padding: 1px 3px; border-radius: 3px; width: 32px;
-    text-align: center; flex-shrink: 0; text-transform: uppercase;
-  }
-  .tag.ac { background: rgba(34,197,94,0.1); color: #4ade80; }
-  .tag.q  { background: rgba(251,191,36,0.1); color: #facc15; }
-  .tag.id { background: rgba(99,102,241,0.1); color: #a78bfa; }
-  .j-entry .txt { color: #94a3b8; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  /* PROJECT VIEW */
-  .project-view { display: none; flex-direction: column; flex: 1; }
-  .project-view.active { display: flex; }
-  .project-header { padding: 8px 14px; border-bottom: 1px solid rgba(99,102,241,0.06); font-size: 13px; font-weight: 600; color: #cbd5e1; }
-  .project-log { flex: 1; overflow-y: auto; padding: 8px 12px; background: rgba(2,6,23,0.28); }
-  .project-input-wrap { padding: 8px 12px; border-top: 1px solid rgba(99,102,241,0.06); }
-  .project-input-wrap textarea {
-    width: 100%; min-height: 50px; resize: vertical; background: rgba(2,6,23,0.62);
-    border: 1px solid rgba(99,102,241,0.18); border-radius: 6px; color: #e2e8f0;
-    padding: 8px 10px; font: 12px/1.4 'Inter', sans-serif; outline: none;
-  }
-  .project-input-wrap textarea:focus { border-color: rgba(167,139,250,0.55); }
-  .project-input-actions { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
-  .project-input-actions .chat-btn.primary { margin-left: auto; }
-
-  /* MAIN VIEWS */
-  .main-view { display: none; flex-direction: column; flex: 1; }
-  .main-view.active { display: flex; }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.1); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.2); }
-
-  @media (max-width: 900px) {
-    .sidebar { width: 50px; min-width: 50px; }
-    .sidebar .folder span:not(.folder-icon),
-    .sidebar .group-header span:not(.count),
-    .sidebar-footer { display: none; }
-  }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:#0b0d17;color:#e2e8f0;height:100vh;overflow:hidden;font-size:14px;line-height:1.5}
+.bg-glow{position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,0.04)0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(236,72,153,0.03)0%,transparent 50%);pointer-events:none;z-index:0}
+/* TOP BAR */
+.topbar{background:rgba(15,17,35,0.95);backdrop-filter:blur(12px);display:flex;align-items:center;padding:0 16px;height:44px;gap:4px;border-bottom:1px solid rgba(99,102,241,0.12);position:sticky;top:0;z-index:100}
+.topbar .logo{font-weight:800;font-size:17px;letter-spacing:-0.5px;background:linear-gradient(135deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tab{color:#64748b;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.12s;text-transform:uppercase;letter-spacing:0.4px}
+.tab:hover{color:#cbd5e1;background:rgba(99,102,241,0.06)}
+.tab.active{color:#e2e8f0;background:rgba(99,102,241,0.12)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;color:#64748b}
+.top-right .clock{font-family:'JetBrains Mono',monospace;font-size:11px}
+.avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f472b6,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700}
+.dot-live{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.5)}
+/* LAYOUT */
+.app{display:flex;height:calc(100vh - 44px);position:relative;z-index:1}
+.sidebar{width:220px;min-width:220px;background:rgba(10,14,30,0.9);border-right:1px solid rgba(99,102,241,0.08);display:flex;flex-direction:column;overflow-y:auto}
+.main{flex:1;overflow-y:auto;padding:12px 16px}
+.rightbar{width:200px;min-width:200px;background:rgba(10,14,30,0.9);border-left:1px solid rgba(99,102,241,0.08);overflow-y:auto;padding:8px}
+/* SIDEBAR SECTIONS */
+.sb-section{margin-bottom:6px}
+.sb-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#475569;padding:8px 14px 4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:12px;color:#94a3b8;cursor:pointer;border-left:3px solid transparent;transition:all 0.12s}
+.sb-item:hover{color:#cbd5e1;background:rgba(99,102,241,0.04)}
+.sb-item.active{color:#e2e8f0;background:rgba(99,102,241,0.08);border-left-color:#a78bfa;font-weight:600}
+.sb-item .icon{font-size:14px;width:18px;text-align:center}
+.sb-item .badge{margin-left:auto;font-size:9px;background:rgba(99,102,241,0.12);padding:1px 6px;border-radius:10px}
+.sb-divider{border:none;border-top:1px solid rgba(99,102,241,0.06);margin:4px 10px}
+/* TICKER ROW */
+.ticker-row{display:flex;align-items:center;padding:3px 14px;font-size:11px;color:#64748b;gap:4px}
+.ticker-row .sym{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#94a3b8;width:42px}
+.ticker-row .px{font-family:'JetBrains Mono',monospace;font-size:10px;margin-left:auto;color:#64748b}
+.ticker-row .ch{font-family:'JetBrains Mono',monospace;font-size:10px;width:42px;text-align:right}
+.up{color:#4ade80!important}.dn{color:#fca5a5!important}
+/* MAIN CONTENT */
+.view{display:none}.view.active{display:block}
+.section-title{font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(99,102,241,0.06)}
+.card{background:rgba(15,17,35,0.85);border:1px solid rgba(99,102,241,0.08);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.card-hdr{font-size:11px;font-weight:600;color:#cbd5e1;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.card-hdr .status{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-left:auto}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.summary-box{background:rgba(15,17,35,0.85);border:1px solid rgba(99,102,241,0.08);border-radius:8px;padding:10px;text-align:center}
+.summary-box .lbl{font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:#475569}
+.summary-box .val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#a78bfa}
+/* CHAT */
+.chat-log{background:rgba(2,6,23,0.3);border-radius:6px;padding:10px;min-height:120px;max-height:200px;overflow-y:auto;margin-bottom:8px}
+.chat-msg{margin-bottom:6px;padding:6px 10px;border-radius:6px;font-size:12px;line-height:1.4;max-width:86%}
+.chat-msg.user{margin-left:auto;background:rgba(99,102,241,0.22);color:#f8fafc}
+.chat-msg.ass{background:rgba(15,23,42,0.78);color:#cbd5e1;border:1px solid rgba(148,163,184,0.1)}
+.chat-input-wrap{display:flex;gap:6px}
+.chat-input-wrap textarea{flex:1;background:rgba(2,6,23,0.62);border:1px solid rgba(99,102,241,0.18);border-radius:6px;color:#e2e8f0;padding:8px;font:12px/1.4 'Inter',sans-serif;resize:none;outline:none;min-height:40px}
+.chat-input-wrap textarea:focus{border-color:rgba(167,139,250,0.55)}
+.btn{background:linear-gradient(135deg,#6366f1,#ec4899);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer}
+/* RIGHTBAR */
+.rb-section{margin-bottom:10px}
+.rb-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#475569;margin-bottom:4px}
+.rb-card{background:rgba(15,17,35,0.6);border:1px solid rgba(99,102,241,0.06);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:11px;color:#94a3b8}
+.rb-card .name{font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:2px}
+/* PORTFOLIO ROWS */
+.pf-row{display:flex;align-items:center;padding:4px 0;font-size:12px;gap:4px;border-bottom:1px solid rgba(99,102,241,0.02)}
+.pf-ticker{font-family:'JetBrains Mono',monospace;font-weight:600;color:#e2e8f0;width:48px}
+.pf-shares{font-family:'JetBrains Mono',monospace;color:#64748b;font-size:11px;width:36px;text-align:right}
+.pf-price{font-family:'JetBrains Mono',monospace;font-size:12px;width:60px;text-align:right;margin-left:auto}
+.pf-chg{font-family:'JetBrains Mono',monospace;font-size:11px;width:44px;text-align:right}
+.pf-val{font-family:'JetBrains Mono',monospace;font-size:11px;width:52px;text-align:right;color:#94a3b8}
+.wk-badge{font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px}
+.wk-s{background:rgba(34,197,94,0.15);color:#4ade80}.wk-t{background:rgba(251,191,36,0.15);color:#facc15}
+.wk-w{background:rgba(239,68,68,0.15);color:#fca5a5}.wk-u{background:rgba(100,116,139,0.1);color:#64748b}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.1);border-radius:2px}
+@media(max-width:900px){.sidebar,.rightbar{display:none}}
 </style>
 </head>
 <body>
 <div class="bg-glow"></div>
 
-<!-- TOP BAR -->
+<!-- TOP TABS -->
 <div class="topbar">
-  <div class="logo"><span class="logo-emoji">🚨</span> PITA Portfolio</div>
-  <div class="status-badge"><span class="dot" id="marketDot"></span><span id="marketStatus">Loading…</span></div>
+  <div class="logo">🚨 PITA OS</div>
+  <div class="tab active" data-tab="desktop">Desktop</div>
+  <div class="tab" data-tab="portfolio">Portfolio</div>
+  <div class="tab" data-tab="agents">Agents</div>
+  <div class="tab" data-tab="settings">Settings</div>
   <div class="top-right">
-    <span class="clock" id="clockDisplay">—</span>
-    <span style="color:#64748b;font-size:12px;">Professor Falken</span>
+    <span class="dot-live"></span>
+    <span style="font-size:11px">Gateway Live</span>
+    <span class="clock" id="clock">—</span>
     <div class="avatar">JF</div>
   </div>
 </div>
 
 <!-- MAIN LAYOUT -->
-<div class="app-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <nav class="sidebar-nav">
-      <div class="folder active" data-view="portfolio">
-        <span class="folder-icon">🏠</span><span>Portfolio</span>
-        <span class="folder-badge" id="folioLive">live</span>
-      </div>
-      <div class="folder" data-view="recent">
-        <span class="folder-icon">🕐</span><span>Recent</span>
-        <span class="folder-badge" id="recentCount">0</span>
-      </div>
-      <hr class="folder-divider">
-      <div class="group-header" id="agentsToggle">
-        🤖 Agents <span class="count">8</span>
-      </div>
-      <div class="agent-group" id="agentGroup"></div>
-      <hr class="folder-divider">
-      <div class="folder" data-view="maye">
-        <span class="folder-icon">📁</span><span>Maye</span>
-      </div>
-      <div class="folder" data-view="barrett">
-        <span class="folder-icon">📁</span><span>Barrett</span>
-      </div>
-      <div class="folder" data-view="abby">
-        <span class="folder-icon">📁</span><span>Abby</span>
-      </div>
-      <div class="folder" data-view="business">
-        <span class="folder-icon">📁</span><span>Business</span>
-      </div>
-      <div class="folder" data-view="ebay">
-        <span class="folder-icon">📁</span><span>eBay</span>
-      </div>
-      <div class="folder" data-view="grants">
-        <span class="folder-icon">📁</span><span>Grants</span>
-      </div>
-    </nav>
-    <div class="sidebar-footer"><span class="dot"></span> Gateway connected</div>
+<div class="app">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-section">
+      <div class="sb-item active" data-view="chat"><span class="icon">💬</span>PITA Chat</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-label">MISSIONS</div>
+    <div class="sb-item" data-view="paper-trail"><span class="icon">📋</span>Paper Trail</div>
+    <div class="sb-item" data-view="credit-dti"><span class="icon">💳</span>Credit & DTI</div>
+    <div class="sb-item" data-view="grants"><span class="icon">🎯</span>Grant Hunter</div>
+    <div class="sb-item" data-view="realestate"><span class="icon">🏠</span>Real Estate</div>
+    <div class="sb-item" data-view="ebay"><span class="icon">📦</span>eBay Resale</div>
+    <div class="sb-item" data-view="abby"><span class="icon">⏱️</span>The Abby Lens</div>
+    <div class="sb-divider"></div>
+    <div class="sb-label">WATCHLIST</div>
+    <div id="watchlistSidebar"></div>
+    <div class="sb-divider"></div>
+    <div class="sb-item" data-view="system"><span class="icon">⚙️</span>System</div>
   </aside>
 
-  <!-- MAIN AREA -->
-  <div class="main-area">
-
-    <!-- PORTFOLIO VIEW -->
-    <div class="main-view active" id="portfolioView">
-      <div class="dashboard-grid">
-        <div class="main-column">
-          <div class="summary-bar">
-            <div class="summary-box"><div class="label">Combined Est. Value</div><div class="value" id="totalValue" style="color:#a78bfa;">$—</div></div>
-            <div class="summary-box"><div class="label">Joseph Individual</div><div class="value" id="josephValue" style="color:#cbd5e1;">$—</div></div>
-            <div class="summary-box"><div class="label">Amanda (Trad+Roth)</div><div class="value" id="amandaValue" style="color:#cbd5e1;">$—</div></div>
-          </div>
-
-          <div class="card">
-            <div class="card-hdr">PITA Chat <span class="sub" id="chatStatus">ready</span></div>
-            <div class="chat-toolbar">
-              <select id="agentSelect">
-                <option value="pita">PITA</option>
-                <option value="memorykeeper">Memory Keeper</option>
-                <option value="scanlite">ScanLite</option>
-                <option value="knowledgescout">Knowledge Scout</option>
-                <option value="correctnessauditor">Correctness Auditor</option>
-                <option value="orchestrationplanner">Orchestration Planner</option>
-                <option value="chatreader">Chat Reader</option>
-                <option value="openclawconnectivity">Connectivity</option>
-              </select>
-              <a class="chat-link secondary" href="http://127.0.0.1:18891/chat" target="_blank" style="padding:5px 7px;">Control UI</a>
-            </div>
-            <div class="chat-log" id="chatLog">
-              <div class="chat-msg assistant">Dashboard ready. Chat with PITA or select an agent above.</div>
-            </div>
-            <div class="chat-input-wrap">
-              <textarea id="chatInput" placeholder="Message PITA..."></textarea>
-              <div class="chat-input-actions">
-                <button class="chat-btn primary" id="sendChatBtn">Send</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card"><div class="card-hdr">🧑 Joseph — Individual <span class="sub" id="josephSub">loading…</span></div><div class="card-body" id="portfolioJoseph"></div></div>
-          <div class="card"><div class="card-hdr">👩 Amanda — Traditional IRA <span class="sub" id="tradSub">loading…</span></div><div class="card-body" id="portfolioTradIRA"></div></div>
-          <div class="card"><div class="card-hdr">👩 Amanda — Roth IRA <span class="sub" id="rothSub">loading…</span></div><div class="card-body" id="portfolioRothIRA"></div></div>
+  <!-- CENTER MAIN -->
+  <main class="main" id="mainContent">
+    <!-- Desktop view (default) -->
+    <div class="view active" id="view-desktop">
+      <div class="summary-grid">
+        <div class="summary-box"><div class="lbl">Combined Value</div><div class="val" id="sumTotal">$—</div></div>
+        <div class="summary-box"><div class="lbl">Joseph</div><div class="val" id="sumJoseph">$—</div></div>
+        <div class="summary-box"><div class="lbl">Amanda</div><div class="val" id="sumAmanda">$—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">PITA — Chief of Staff <span class="status"></span></div>
+        <div class="chat-log" id="chatLog"><div class="chat-msg ass">PITA OS online. OpenClaw gateway connected. Swarm agents: 8 active.</div></div>
+        <div class="chat-input-wrap">
+          <textarea id="chatInput" placeholder="Message PITA..." rows="1"></textarea>
+          <button class="btn" id="sendBtn">Send</button>
         </div>
-
-        <div class="right-sidebar">
-          <div class="card">
-            <div class="control-note">
-              <strong>OpenClaw Gateway</strong>
-              <div class="connection-row"><span class="connection-dot" id="gatewayHealthDot"></span><span id="gatewayHealthText">Checking…</span></div>
-              <a class="chat-link" href="http://127.0.0.1:18891/chat" target="_blank">Fresh PITA chat</a>
-              <a class="chat-link secondary" href="http://127.0.0.1:18891/agents" target="_blank">Agents &amp; Skills</a>
-            </div>
-          </div>
-          <div class="card"><div class="readonly-note">⚡ <strong>Chat opens in Control UI.</strong><br>This dashboard mirrors your live data.</div></div>
-          <div class="card">
-            <div class="card-hdr">📈 Watchlist <span class="sub" id="priceCount">0/12 live</span></div>
-            <div class="market-box"><span class="dot" style="background:#475569"></span><span id="marketTimeText">—</span></div>
-            <div class="card-body" id="watchlistAll"><div style="padding:12px;color:#475569;font-size:11px;text-align:center;">Loading prices…</div></div>
-            <div class="refresh-line"><span class="spinner" id="priceSpinner"></span><span id="lastRefresh">Next refresh in 60s</span></div>
-          </div>
-          <div class="card">
-            <div class="card-hdr">📔 Activity Log <span class="sub" id="journalCount">0 events</span></div>
-            <div class="journal-entries" id="journalEntries"><div class="j-entry"><span class="t">—</span><span class="tag id">IDEA</span><span class="txt" style="color:#475569;">Dashboard loaded</span></div></div>
-          </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">📈 Investment Hub</div>
+        <div id="portfolioMini"></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🤖 Swarm Active <span style="font-size:10px;color:#64748b;margin-left:auto">8 agents</span></div>
+        <div id="swarmStatus" style="font-size:11px;color:#94a3b8">
+          Memory Keeper · Knowledge Scout · Correctness Auditor · ScanLite · AI Sub Manager · Chat Reader · Connectivity · Orchestration Planner
         </div>
       </div>
     </div>
 
-    <!-- PROJECT VIEWS -->
-    <div class="project-view" id="projectView">
-      <div class="project-header" id="projectHeader">📁 Project</div>
-      <div class="project-log" id="projectLog">
-        <div class="chat-msg assistant">No messages yet in this folder. Start a conversation.</div>
-      </div>
-      <div class="project-input-wrap">
-        <textarea id="projectInput" placeholder="Send message..."></textarea>
-        <div class="project-input-actions">
-          <button class="chat-btn primary" id="sendProjectBtn">Send</button>
-        </div>
-      </div>
+    <!-- Portfolio view -->
+    <div class="view" id="view-portfolio">
+      <div class="section-title">Portfolio</div>
+      <div class="card"><div class="card-hdr">🧑 Joseph — Individual</div><div id="pfJoseph"></div></div>
+      <div class="card"><div class="card-hdr">👩 Amanda — Traditional IRA</div><div id="pfTrad"></div></div>
+      <div class="card"><div class="card-hdr">👩 Amanda — Roth IRA</div><div id="pfRoth"></div></div>
     </div>
 
-    <!-- RECENT VIEW -->
-    <div class="project-view" id="recentView">
-      <div class="project-header">🕐 Recent Conversations</div>
-      <div class="project-log" id="recentLog">
-        <div class="chat-msg assistant">Recent conversations from all folders will appear here.</div>
-      </div>
+    <!-- Agents view -->
+    <div class="view" id="view-agents"><div class="section-title">Agents</div><div id="agentsList"></div></div>
+
+    <!-- Project views -->
+    <div class="view" id="view-project"><div class="section-title" id="projectTitle"></div><div class="chat-log" id="projectLog" style="min-height:200px"></div><div class="chat-input-wrap"><textarea id="projectInput" placeholder="Send message..." rows="1"></textarea><button class="btn" id="projectSendBtn">Send</button></div></div>
+
+    <!-- Settings -->
+    <div class="view" id="view-settings"><div class="section-title">Settings</div><div class="card"><p style="font-size:12px;color:#94a3b8">Gateway: <span style="color:#4ade80">Online</span> · Model: DeepSeek V4 Flash · Image: Nvidia Nemo</p></div></div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="rightbar">
+    <div class="rb-section">
+      <div class="rb-label">Scouts Active</div>
+      <div class="rb-card"><div class="name">🔍 Knowledge Scout</div>Vault search · evidence</div>
+      <div class="rb-card"><div class="name">📈 Stock Watch</div>Live prices · yFinance</div>
+      <div class="rb-card"><div class="name">💡 Innovation Scout</div>YouTube · new ideas</div>
     </div>
-  </div>
+    <div class="rb-section">
+      <div class="rb-label">Recent Activity</div>
+      <div id="activityLog" style="font-size:10px;color:#475569">Dashboard loaded</div>
+    </div>
+  </aside>
 </div>
 
-<script src="dashboard.js"></script>
+<script>
+// ===== DATA =====
+const PORTFOLIO = {
+  joseph:{cash:0.65,holdings:[
+    {t:'ACHV',s:681},{t:'TYGO',s:611},{t:'VELO',s:14},{t:'ONDS',s:114},{t:'NOK',s:34},
+    {t:'FRVO',s:0,n:1},{t:'BXDC',s:0,n:1},{t:'DNN',s:0,n:1},{t:'WOLF',s:0,n:1},{t:'QBTS',s:0,n:1},{t:'QTUM',s:0,n:1},{t:'SMPIX',s:0,n:1}
+  ]},
+  trad:{cash:2136,holdings:[
+    {t:'TYGO',s:1302},{t:'ACHV',s:857},{t:'DNN',s:500},{t:'ONDS',s:188},{t:'URG',s:650,x:1}
+  ]},
+  roth:{cash:1544,holdings:[
+    {t:'SMPIX',s:36},{t:'ACHV',s:519},{t:'TYGO',s:639},{t:'QTUM',s:15},{t:'ONDS',s:146},{t:'QBTS',s:50}
+  ]}
+};
+const WK={FRVO:{l:'WOLF',c:'wk-w'},ONDS:{l:'TRADE',c:'wk-t'},TYGO:{l:'SURVIVE',c:'wk-s'},ACHV:{l:'VALID',c:'wk-s'},DNN:{l:'SURVIVE',c:'wk-s'},URG:{l:'SOLD',c:'wk-u'},WOLF:{l:'WOLF',c:'wk-w'},QBTS:{l:'?',c:'wk-u'},QTUM:{l:'?',c:'wk-u'},SMPIX:{l:'?',c:'wk-u'},VELO:{l:'?',c:'wk-u'},NOK:{l:'?',c:'wk-u'},BXDC:{l:'?',c:'wk-u'}};
+const TICKERS=['FRVO','BXDC','ONDS','TYGO','ACHV','DNN','WOLF','VELO','NOK','QBTS','QTUM','SMPIX','URG'];
+let prices={},changes={},currentView='desktop',currentProject=null,chat=[],projectChats={};
+const LS='pita_os_v1';
+
+// ===== INIT =====
+function init(){
+  load();renderWatchlist();fetchPrices();setInterval(fetchPrices,60000);setInterval(updateClock,10000);updateClock();
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+  document.querySelectorAll('.sb-item[data-view]').forEach(i=>i.addEventListener('click',()=>switchSidebar(i.dataset.view)));
+  document.getElementById('sendBtn').addEventListener('click',sendChat);
+  document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
+  document.getElementById('projectSendBtn')?.addEventListener('click',sendProject);
+  document.getElementById('projectInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendProject();}});
+  renderAgents();renderPortfolio();log('Dashboard loaded');
+}
+
+// ===== NAVIGATION =====
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById(`view-${tab}`);if(v)v.classList.add('active');
+  currentView=tab;
+}
+function switchSidebar(view){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.querySelector(`.sb-item[data-view="${view}"]`)?.classList.add('active');
+  const projectViews=['paper-trail','credit-dti','grants','realestate','ebay','abby','maye','barrett','business'];
+  if(view==='chat'){switchTab('desktop');currentProject=null}
+  else if(view==='system'){switchTab('settings')}
+  else if(projectViews.includes(view)){
+    switchTab('desktop');
+    currentProject=view;
+    document.getElementById('projectTitle').textContent='📁 '+{'paper-trail':'Paper Trail','credit-dti':'Credit & DTI','grants':'Grant Hunter','realestate':'Real Estate Scout','ebay':'eBay Resale','abby':'The Abby Lens','maye':'Dawnn Maye','barrett':'Jennifer Barrett','business':'Business'}[view];
+    renderProject();
+  }
+}
+
+// ===== CHAT =====
+function sendChat(){
+  const i=document.getElementById('chatInput');if(!i)return;const t=i.value.trim();if(!t)return;
+  chat.push({r:'user',text:t,time:Date.now()});i.value='';renderChat();save();
+  setTimeout(()=>{chat.push({r:'ass',text:'Acknowledged. Full chat in Control UI: http://127.0.0.1:18891/chat',time:Date.now()});renderChat();save();},300);
+}
+function sendProject(){
+  const i=document.getElementById('projectInput');if(!i||!currentProject)return;const t=i.value.trim();if(!t)return;
+  if(!projectChats[currentProject])projectChats[currentProject]=[];
+  projectChats[currentProject].push({r:'user',text:t,time:Date.now()});i.value='';renderProject();save();
+  setTimeout(()=>{projectChats[currentProject].push({r:'ass',text:'['+currentProject+'] Noted.',time:Date.now()});renderProject();save();},200);
+}
+function renderChat(){
+  const l=document.getElementById('chatLog');if(!l)return;
+  l.innerHTML=chat.length===0?'<div class="chat-msg ass">PITA OS online.</div>':chat.slice(-30).map(m=>`<div class="chat-msg ${m.r==='user'?'user':'ass'}">${esc(m.text)}</div>`).join('');
+}
+function renderProject(){
+  const l=document.getElementById('projectLog');if(!l||!currentProject)return;
+  const ms=projectChats[currentProject]||[];
+  l.innerHTML=ms.length===0?`<div class="chat-msg ass">No messages yet in this folder.</div>`:ms.slice(-30).map(m=>`<div class="chat-msg ${m.r==='user'?'user':'ass'}">${esc(m.text)}</div>`).join('');
+}
+
+// ===== PORTFOLIO =====
+function fmtPrice(acct,containerId){
+  const c=document.getElementById(containerId);if(!c)return 0;
+  const d=PORTFOLIO[acct];let tv=d.cash,html='';
+  d.holdings.filter(h=>h.s>0).forEach(h=>{const p=prices[h.t]||0,v=p*h.s;tv+=v;const pc=changes[h.t],cls=pc&&pc.cp>0?'up':pc&&pc.cp<0?'dn':'',ch=pc?(pc.cp>=0?'+':'')+pc.cp.toFixed(1)+'%':'—';const wk=WK[h.t];
+    html+=`<div class="pf-row${h.x?'':'}'"><span class="pf-ticker">${h.t}</span><span class="pf-shares">${h.s}</span>${wk?`<span class="wk-badge ${wk.c}">${wk.l}</span>`:''}<span class="pf-price">$${p?p.toFixed(2):'—'}</span><span class="pf-chg ${cls}">${ch}</span><span class="pf-val">$${v.toFixed(0)}</span></div>`});
+  d.holdings.filter(h=>h.s===0).forEach(h=>{const p=prices[h.t]||0,pc=changes[h.t],cls=pc&&pc.cp>0?'up':pc&&pc.cp<0?'dn':'',ch=pc?(pc.cp>=0?'+':'')+pc.cp.toFixed(1)+'%':'—';
+    html+=`<div class="pf-row"><span class="pf-ticker">${h.t}</span><span style="font-size:9px;color:#475569">NEW</span><span class="pf-price" style="margin-left:auto">$${p?p.toFixed(2):'—'}</span><span class="pf-chg ${cls}">${ch}</span></div>`});
+  c.innerHTML=html;return tv;
+}
+function renderPortfolio(){
+  const jv=fmtPrice('joseph','pfJoseph'),tv=fmtPrice('trad','pfTrad'),rv=fmtPrice('roth','pfRoth');
+  const total=jv+tv+rv;
+  const te=document.getElementById('sumTotal'),je=document.getElementById('sumJoseph'),ae=document.getElementById('sumAmanda');
+  if(te)te.textContent='$'+total.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+  if(je)je.textContent='$'+jv.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+  if(ae)ae.textContent='$'+(tv+rv).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+  // Mini portfolio
+  const pm=document.getElementById('portfolioMini');
+  if(pm){let html='';Object.entries(PORTFOLIO).forEach(([k,v])=>{v.holdings.filter(h=>h.s>0).forEach(h=>{const p=prices[h.t]||0,val=p*h.s;if(val>0)html+=`<div class="pf-row"><span class="pf-ticker">${h.t}</span><span class="pf-shares">${h.s}</span><span class="pf-price">$${p?p.toFixed(2):'—'}</span><span class="pf-val">$${val.toFixed(0)}</span></div>`})});pm.innerHTML=html||'<div style="color:#475569;font-size:11px">Loading prices...</div>';}
+}
+function renderWatchlist(){
+  const c=document.getElementById('watchlistSidebar');if(!c)return;
+  c.innerHTML=TICKERS.map(t=>`<div class="ticker-row"><span class="sym">${t}</span><span class="px" id="wlp_${t}">—</span><span class="ch" id="wlc_${t}">—</span></div>`).join('');
+}
+function updateWatchlist(){
+  TICKERS.forEach(t=>{const p=prices[t],pc=changes[t],pe=document.getElementById('wlp_'+t),ce=document.getElementById('wlc_'+t);
+    if(pe)pe.textContent=p?'$'+p.toFixed(2):'—';if(ce){if(pc){ce.textContent=(pc.cp>=0?'+':'')+pc.cp.toFixed(1)+'%';ce.className='ch '+(pc.cp>0?'up':pc.cp<0?'dn':'')}else ce.textContent='—'}});
+}
+
+// ===== YAHOO PRICES =====
+async function fetchYahoo(ticker){
+  try{const r=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`,{signal:AbortSignal.timeout(5000)});if(!r.ok)return null;
+    const d=await r.json(),m=d?.chart?.result?.[0]?.meta;if(!m||!m.regularMarketPrice)return null;
+    const p=m.regularMarketPrice,pr=m.chartPreviousClose||m.previousClose;
+    let cp;if(pr&&pr>0)cp=((p-pr)/pr)*100;
+    return{ticker,price:p,cp};}catch(e){return null;}
+}
+async function fetchPrices(){
+  for(const t of TICKERS){const r=await fetchYahoo(t);if(r&&r.price>0){prices[r.ticker]=r.price;if(r.cp!==undefined)changes[r.ticker]={cp:r.cp};}}
+  renderPortfolio();updateWatchlist();
+}
+
+// ===== AGENTS =====
+function renderAgents(){
+  const c=document.getElementById('agentsList');if(!c)return;
+  const agents=[{n:'Memory Keeper',i:'🧠',s:'active'},{n:'Knowledge Scout',i:'🔍',s:'active'},{n:'Correctness Auditor',i:'✅',s:'active'},{n:'ScanLite',i:'🔎',s:'ready'},{n:'AI Sub Manager',i:'💰',s:'active'},{n:'Chat Reader',i:'📖',s:'ready'},{n:'Connectivity',i:'🔗',s:'active'},{n:'Orch. Planner',i:'📋',s:'ready'}];
+  c.innerHTML=agents.map(a=>`<div class="pf-row" style="padding:6px 0"><span>${a.i}</span><span style="font-weight:600;color:#cbd5e1;flex:1">${a.n}</span><span style="width:7px;height:7px;border-radius:50%;background:${a.s==='active'?'#22c55e':'#64748b'};display:inline-block"></span></div>`).join('');
+}
+
+// ===== UTILS =====
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function updateClock(){const e=document.getElementById('clock');if(e)e.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function log(t){const e=document.getElementById('activityLog');if(e)e.innerHTML='<div>'+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' — '+esc(t)+'</div>'+e.innerHTML}
+function load(){try{const d=JSON.parse(localStorage.getItem(LS));if(d){chat=d.chat||[];projectChats=d.projectChats||{}}}catch(e){}}
+function save(){localStorage.setItem(LS,JSON.stringify({chat,projectChats}))}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
 </body>
 </html>
